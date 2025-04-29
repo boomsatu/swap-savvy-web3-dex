@@ -12,7 +12,7 @@ const projectId = 'YOUR_WALLET_CONNECT_PROJECT_ID';
 const chains = [bsc, bscTestnet];
 
 export const config = createConfig({
-  chains,
+  chains: chains as any, // Type assertion to avoid type errors with readonly array
   transports: {
     [bsc.id]: http(),
     [bscTestnet.id]: http()
@@ -31,8 +31,7 @@ export const web3Modal = createWeb3Modal({
   themeMode: 'dark',
   themeVariables: {
     '--w3m-accent': '#8B5CF6',
-    // Using the correct property from ThemeVariables
-    '--w3m-color-bg-1': '#1A1F2C'
+    '--w3m-background': '#1A1F2C' // Using the correct variable name compatible with ThemeVariables
   },
   featuredWalletIds: [],
 });

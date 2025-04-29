@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useReadContract, useNetwork } from 'wagmi';
+import { useReadContract, useChainId } from 'wagmi';
 import { ERC20_ABI, DEFAULT_TOKENS } from '../config/contracts';
 import { Token } from '../types/token';
 import { Address } from 'viem';
@@ -11,14 +11,14 @@ export function useTokenSearch() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { chain } = useNetwork();
+  const chainId = useChainId();
   
   // Update default tokens when network changes
   useEffect(() => {
-    if (chain) {
+    if (chainId) {
       setSearchResults(DEFAULT_TOKENS);
     }
-  }, [chain?.id]);
+  }, [chainId]);
 
   const { data: tokenName, isPending: isLoadingName } = useReadContract({
     address: searchTerm as Address,
@@ -76,7 +76,7 @@ export function useTokenSearch() {
   // Add custom token when data is loaded
   const addCustomToken = () => {
     if (tokenName && tokenSymbol && tokenDecimals !== undefined && searchTerm) {
-      const networkName = chain?.id === bscTestnet.id ? 'Testnet' : 'Mainnet';
+      const networkName = chainId === bscTestnet.id ? 'Testnet' : 'Mainnet';
       const newToken: Token = {
         address: searchTerm as Address,
         name: tokenName as string,
@@ -84,7 +84,7 @@ export function useTokenSearch() {
         decimals: Number(tokenDecimals),
         // Use network-specific logo or fallback
         logoURI: `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/${searchTerm}/logo.png`,
-        network: chain?.id === bscTestnet.id ? 'testnet' : 'mainnet',
+        network: chainId === bscTestnet.id ? 'testnet' : 'mainnet',
       };
       
       console.log(`Token found on ${networkName}:`, newToken);

@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader, ChevronDown, Search, Network } from 'lucide-react';
 import { Token } from '../types/token';
 import useTokenSearch from '../hooks/useTokenSearch';
-import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
+import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 import { bsc, bscTestnet } from 'wagmi/chains';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -28,8 +28,8 @@ const TokenSelect = ({ selectedToken, onTokenSelect, label, className }: TokenSe
   const [open, setOpen] = useState(false);
   const { searchResults, handleSearch, isLoading, error, addCustomToken } = useTokenSearch();
   const { isConnected } = useAccount();
-  const { chain } = useNetwork();
-  const { switchNetwork } = useSwitchNetwork();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
   const { toast } = useToast();
   const [addressInput, setAddressInput] = useState('');
   
@@ -40,8 +40,8 @@ const TokenSelect = ({ selectedToken, onTokenSelect, label, className }: TokenSe
   };
   
   const handleNetworkSwitch = (chainId: number) => {
-    if (switchNetwork) {
-      switchNetwork(chainId);
+    if (switchChain) {
+      switchChain({ chainId });
       toast({
         title: "Network Changed",
         description: `Switched to ${chainId === bsc.id ? 'BSC Mainnet' : 'BSC Testnet'}`,
@@ -98,7 +98,7 @@ const TokenSelect = ({ selectedToken, onTokenSelect, label, className }: TokenSe
             <div className="flex gap-2">
               <Button 
                 size="sm" 
-                variant={chain?.id === bsc.id ? "default" : "outline"} 
+                variant={chainId === bsc.id ? "default" : "outline"} 
                 onClick={() => handleNetworkSwitch(bsc.id)}
                 className="text-xs"
               >
@@ -106,7 +106,7 @@ const TokenSelect = ({ selectedToken, onTokenSelect, label, className }: TokenSe
               </Button>
               <Button 
                 size="sm" 
-                variant={chain?.id === bscTestnet.id ? "default" : "outline"} 
+                variant={chainId === bscTestnet.id ? "default" : "outline"} 
                 onClick={() => handleNetworkSwitch(bscTestnet.id)}
                 className="text-xs"
               >
