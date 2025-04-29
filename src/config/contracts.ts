@@ -83,35 +83,35 @@ export const ERC20_ABI = [
 
 export const DEFAULT_TOKENS = [
   {
-    address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+    address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' as Address,
     symbol: 'WBNB',
     name: 'Wrapped BNB',
     decimals: 18,
     logoURI: 'https://assets.coingecko.com/coins/images/12591/small/binance-coin-logo.png'
   },
   {
-    address: '0x55d398326f99059fF775485246999027B3197955',
+    address: '0x55d398326f99059fF775485246999027B3197955' as Address,
     symbol: 'USDT',
     name: 'Tether USD',
     decimals: 18,
     logoURI: 'https://assets.coingecko.com/coins/images/325/small/Tether.png'
   },
   {
-    address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
+    address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d' as Address,
     symbol: 'USDC',
     name: 'USD Coin',
     decimals: 18,
     logoURI: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png'
   },
   {
-    address: '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c',
+    address: '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c' as Address,
     symbol: 'BTC',
     name: 'Bitcoin BEP20',
     decimals: 18,
     logoURI: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
   },
   {
-    address: '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
+    address: '0x2170Ed0880ac9A755fd29B2688956BD959F933F8' as Address,
     symbol: 'ETH',
     name: 'Ethereum BEP20',
     decimals: 18,

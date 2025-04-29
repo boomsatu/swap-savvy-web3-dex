@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import TokenSelect from './TokenSelect';
-import { ArrowDown, Settings, ArrowRight } from 'lucide-react';
+import { ArrowDown, Settings, ArrowRight, Loader } from 'lucide-react';
 import { Token, SwapState } from '../types/token';
 import useTokenBalance from '../hooks/useTokenBalance';
 import useSwap from '../hooks/useSwap';
