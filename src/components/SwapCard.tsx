@@ -9,6 +9,7 @@ import { ArrowDown, Settings, ArrowRight, Loader } from 'lucide-react';
 import { Token, SwapState } from '../types/token';
 import useTokenBalance from '../hooks/useTokenBalance';
 import useSwap from '../hooks/useSwap';
+import useSwapAction from '../hooks/useSwapAction';
 import { Separator } from '@/components/ui/separator';
 import { DEFAULT_TOKENS } from '@/config/contracts';
 import { toast } from 'sonner';
@@ -30,6 +31,9 @@ const SwapCard = () => {
   
   // Calculate swap details
   const { amountOut, priceImpact, isLoading: isLoadingSwap } = useSwap(swapState);
+  
+  // Swap action hook
+  const { performSwap, isApproving, isSwapping } = useSwapAction(swapState);
   
   // Set initial tokens when connected
   useEffect(() => {
@@ -117,8 +121,18 @@ const SwapCard = () => {
   };
   
   // Handle swap
-  const handleSwap = () => {
-    toast.success('Swap initiated! This is a demo - no actual swap will occur.');
+  const handleSwap = async () => {
+    if (!isConnected) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+    
+    try {
+      await performSwap();
+    } catch (error) {
+      console.error('Swap failed:', error);
+      toast.error('Swap failed. Please try again.');
+    }
   };
   
   // Format price if both tokens are selected
@@ -238,7 +252,7 @@ const SwapCard = () => {
       <CardFooter>
         <Button
           className="w-full bg-dex-gradient hover:opacity-90 text-white h-12"
-          disabled={!shouldEnableSwap || isLoadingSwap}
+          disabled={!shouldEnableSwap || isLoadingSwap || isApproving || isSwapping}
           onClick={handleSwap}
         >
           {!isConnected ? (
@@ -253,6 +267,16 @@ const SwapCard = () => {
             <div className="flex items-center">
               <Loader className="h-4 w-4 mr-2 animate-spin" />
               Calculating
+            </div>
+          ) : isApproving ? (
+            <div className="flex items-center">
+              <Loader className="h-4 w-4 mr-2 animate-spin" />
+              Approving
+            </div>
+          ) : isSwapping ? (
+            <div className="flex items-center">
+              <Loader className="h-4 w-4 mr-2 animate-spin" />
+              Swapping
             </div>
           ) : (
             <div className="flex items-center justify-center">
