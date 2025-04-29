@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				dex: {
+					purple: '#8B5CF6',
+					'purple-dark': '#6E59A5',
+					pink: '#D946EF',
+					dark: '#1A1F2C',
+					'card-bg': 'rgba(30, 33, 48, 0.8)',
+					'hover': 'rgba(139, 92, 246, 0.1)'
 				}
 			},
 			borderRadius: {
@@ -84,12 +93,27 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+				'pulse-glow': {
+					'0%, 100%': { 
+						opacity: '1',
+						boxShadow: '0 0 10px rgba(139, 92, 246, 0.7)' 
+					},
+					'50%': { 
+						opacity: '0.7',
+						boxShadow: '0 0 25px rgba(139, 92, 246, 0.3)' 
+					}
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--gradient-color-stops))',
+				'dex-gradient': 'linear-gradient(135deg, #8B5CF6 0%, #D946EF 100%)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
