@@ -8,6 +8,7 @@ export interface Token {
   decimals: number;
   logoURI?: string;
   balance?: string;
+  network?: 'mainnet' | 'testnet';
 }
 
 export interface SwapState {

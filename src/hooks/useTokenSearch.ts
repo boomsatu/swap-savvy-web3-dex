@@ -1,22 +1,31 @@
 
-import { useState } from 'react';
-import { useReadContract } from 'wagmi';
+import { useState, useEffect } from 'react';
+import { useReadContract, useNetwork } from 'wagmi';
 import { ERC20_ABI, DEFAULT_TOKENS } from '../config/contracts';
 import { Token } from '../types/token';
 import { Address } from 'viem';
+import { bsc, bscTestnet } from 'wagmi/chains';
 
 export function useTokenSearch() {
   const [searchResults, setSearchResults] = useState<Token[]>(DEFAULT_TOKENS);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { chain } = useNetwork();
   
+  // Update default tokens when network changes
+  useEffect(() => {
+    if (chain) {
+      setSearchResults(DEFAULT_TOKENS);
+    }
+  }, [chain?.id]);
+
   const { data: tokenName, isPending: isLoadingName } = useReadContract({
     address: searchTerm as Address,
     abi: ERC20_ABI,
     functionName: 'name',
     query: {
-      enabled: searchTerm?.startsWith('0x') && searchTerm.length === 42,
+      enabled: Boolean(searchTerm?.startsWith('0x') && searchTerm.length === 42),
     }
   });
   
@@ -25,7 +34,7 @@ export function useTokenSearch() {
     abi: ERC20_ABI,
     functionName: 'symbol',
     query: {
-      enabled: searchTerm?.startsWith('0x') && searchTerm.length === 42,
+      enabled: Boolean(searchTerm?.startsWith('0x') && searchTerm.length === 42),
     }
   });
   
@@ -34,7 +43,7 @@ export function useTokenSearch() {
     abi: ERC20_ABI,
     functionName: 'decimals',
     query: {
-      enabled: searchTerm?.startsWith('0x') && searchTerm.length === 42,
+      enabled: Boolean(searchTerm?.startsWith('0x') && searchTerm.length === 42),
     }
   });
   
@@ -52,7 +61,8 @@ export function useTokenSearch() {
     // If it's an address
     if (term.startsWith('0x') && term.length === 42) {
       setIsLoading(true);
-      // Wait for token data to load from contract
+      console.log("Searching for token by address:", term);
+      // Actual token data loading is handled by the useReadContract hooks above
     } else {
       // Filter tokens by name or symbol
       const filteredTokens = DEFAULT_TOKENS.filter(token => 
@@ -66,16 +76,21 @@ export function useTokenSearch() {
   // Add custom token when data is loaded
   const addCustomToken = () => {
     if (tokenName && tokenSymbol && tokenDecimals !== undefined && searchTerm) {
+      const networkName = chain?.id === bscTestnet.id ? 'Testnet' : 'Mainnet';
       const newToken: Token = {
         address: searchTerm as Address,
         name: tokenName as string,
         symbol: tokenSymbol as string,
         decimals: Number(tokenDecimals),
-        logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png', // Default logo
+        // Use network-specific logo or fallback
+        logoURI: `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/${searchTerm}/logo.png`,
+        network: chain?.id === bscTestnet.id ? 'testnet' : 'mainnet',
       };
       
+      console.log(`Token found on ${networkName}:`, newToken);
+      
       // Add to results if not already in the list
-      if (!searchResults.some(token => token.address === newToken.address)) {
+      if (!searchResults.some(token => token.address.toLowerCase() === newToken.address.toLowerCase())) {
         setSearchResults([newToken, ...searchResults]);
       }
       
@@ -85,7 +100,7 @@ export function useTokenSearch() {
     }
     
     if (!isLoadingName && !isLoadingSymbol && !isLoadingDecimals && searchTerm?.startsWith('0x')) {
-      setError('Invalid token address or contract');
+      setError('Invalid token address or contract not found on this network');
       setIsLoading(false);
     }
     
@@ -93,14 +108,23 @@ export function useTokenSearch() {
   };
   
   // Check if we have loaded token data
-  if (tokenName && tokenSymbol && tokenDecimals !== undefined && searchTerm?.startsWith('0x')) {
-    addCustomToken();
-  }
+  useEffect(() => {
+    if (tokenName && tokenSymbol && tokenDecimals !== undefined && searchTerm?.startsWith('0x')) {
+      addCustomToken();
+    }
+  }, [tokenName, tokenSymbol, tokenDecimals, searchTerm]);
+  
+  // Update loading state based on contract read status
+  useEffect(() => {
+    if (searchTerm?.startsWith('0x') && searchTerm.length === 42) {
+      setIsLoading(isLoadingName || isLoadingSymbol || isLoadingDecimals);
+    }
+  }, [isLoadingName, isLoadingSymbol, isLoadingDecimals, searchTerm]);
   
   return {
     searchResults,
     handleSearch,
-    isLoading: isLoading || isLoadingName || isLoadingSymbol || isLoadingDecimals,
+    isLoading: isLoading,
     error,
     addCustomToken,
   };

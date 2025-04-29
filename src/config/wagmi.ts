@@ -1,6 +1,6 @@
 
 import { http, createConfig } from 'wagmi';
-import { bsc } from 'wagmi/chains';
+import { bsc, bscTestnet } from 'wagmi/chains';
 import { createWeb3Modal } from '@web3modal/wagmi';
 import { walletConnect } from 'wagmi/connectors';
 import { injected } from 'wagmi/connectors';
@@ -8,10 +8,14 @@ import { injected } from 'wagmi/connectors';
 // Get projectId from WalletConnect Cloud
 const projectId = 'YOUR_WALLET_CONNECT_PROJECT_ID';
 
+// Support both mainnet and testnet
+const chains = [bsc, bscTestnet];
+
 export const config = createConfig({
-  chains: [bsc],
+  chains,
   transports: {
-    [bsc.id]: http()
+    [bsc.id]: http(),
+    [bscTestnet.id]: http()
   },
   connectors: [
     injected(),
@@ -27,8 +31,8 @@ export const web3Modal = createWeb3Modal({
   themeMode: 'dark',
   themeVariables: {
     '--w3m-accent': '#8B5CF6',
-    // Using the correct property name from ThemeVariables type
-    '--w3m-background': '#1A1F2C'
+    // Using the correct property from ThemeVariables
+    '--w3m-color-bg-1': '#1A1F2C'
   },
   featuredWalletIds: [],
 });

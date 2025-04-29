@@ -10,10 +10,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader, ChevronDown, Search } from 'lucide-react';
+import { Loader, ChevronDown, Search, Network } from 'lucide-react';
 import { Token } from '../types/token';
 import useTokenSearch from '../hooks/useTokenSearch';
-import { useAccount } from 'wagmi';
+import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
+import { bsc, bscTestnet } from 'wagmi/chains';
+import { useToast } from '@/components/ui/use-toast';
 
 interface TokenSelectProps {
   selectedToken: Token | null;
@@ -24,12 +26,44 @@ interface TokenSelectProps {
 
 const TokenSelect = ({ selectedToken, onTokenSelect, label, className }: TokenSelectProps) => {
   const [open, setOpen] = useState(false);
-  const { searchResults, handleSearch, isLoading, error } = useTokenSearch();
+  const { searchResults, handleSearch, isLoading, error, addCustomToken } = useTokenSearch();
   const { isConnected } = useAccount();
+  const { chain } = useNetwork();
+  const { switchNetwork } = useSwitchNetwork();
+  const { toast } = useToast();
+  const [addressInput, setAddressInput] = useState('');
   
   const handleTokenSelect = (token: Token) => {
     onTokenSelect(token);
     setOpen(false);
+    setAddressInput('');
+  };
+  
+  const handleNetworkSwitch = (chainId: number) => {
+    if (switchNetwork) {
+      switchNetwork(chainId);
+      toast({
+        title: "Network Changed",
+        description: `Switched to ${chainId === bsc.id ? 'BSC Mainnet' : 'BSC Testnet'}`,
+      });
+    }
+  };
+
+  const handleAddressInput = (value: string) => {
+    setAddressInput(value);
+    handleSearch(value);
+  };
+
+  const handleSearchOrAdd = () => {
+    if (addressInput && addressInput.startsWith('0x') && addressInput.length === 42) {
+      const token = addCustomToken();
+      if (token) {
+        toast({
+          title: "Token Added",
+          description: `${token.symbol} (${token.name}) has been added to the list`,
+        });
+      }
+    }
   };
   
   return (
@@ -59,15 +93,43 @@ const TokenSelect = ({ selectedToken, onTokenSelect, label, className }: TokenSe
       </DialogTrigger>
       <DialogContent className="glass-panel border-none max-w-md">
         <DialogHeader>
-          <DialogTitle>Select a token</DialogTitle>
-          <div className="relative mt-4">
-            <Search className="absolute top-3 left-3 h-4 w-4 opacity-50" />
-            <Input
-              placeholder="Search by name, symbol, or paste address"
-              className="pl-10 bg-white/5 border-white/10"
-              onChange={(e) => handleSearch(e.target.value)}
-              autoFocus
-            />
+          <DialogTitle className="flex justify-between items-center">
+            <span>Select a token</span>
+            <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                variant={chain?.id === bsc.id ? "default" : "outline"} 
+                onClick={() => handleNetworkSwitch(bsc.id)}
+                className="text-xs"
+              >
+                <Network className="h-3 w-3 mr-1" /> Mainnet
+              </Button>
+              <Button 
+                size="sm" 
+                variant={chain?.id === bscTestnet.id ? "default" : "outline"} 
+                onClick={() => handleNetworkSwitch(bscTestnet.id)}
+                className="text-xs"
+              >
+                <Network className="h-3 w-3 mr-1" /> Testnet
+              </Button>
+            </div>
+          </DialogTitle>
+          <div className="relative mt-4 flex gap-2">
+            <div className="relative flex-grow">
+              <Search className="absolute top-3 left-3 h-4 w-4 opacity-50" />
+              <Input
+                placeholder="Search by name, symbol, or paste address"
+                className="pl-10 bg-white/5 border-white/10"
+                value={addressInput}
+                onChange={(e) => handleAddressInput(e.target.value)}
+                autoFocus
+              />
+            </div>
+            {addressInput && addressInput.startsWith('0x') && addressInput.length === 42 && (
+              <Button onClick={handleSearchOrAdd} disabled={isLoading}>
+                {isLoading ? <Loader className="h-4 w-4 animate-spin" /> : "Add"}
+              </Button>
+            )}
           </div>
         </DialogHeader>
         
