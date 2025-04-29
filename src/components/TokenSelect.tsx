@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -8,14 +8,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader, ChevronDown, Search, Network } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Token } from '../types/token';
 import useTokenSearch from '../hooks/useTokenSearch';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 import { bsc, bscTestnet } from 'wagmi/chains';
 import { useToast } from '@/components/ui/use-toast';
+import NetworkSelector from './token/NetworkSelector';
+import TokenSearch from './token/TokenSearch';
+import TokenList from './token/TokenList';
 
 interface TokenSelectProps {
   selectedToken: Token | null;
@@ -65,6 +66,8 @@ const TokenSelect = ({ selectedToken, onTokenSelect, label, className }: TokenSe
       }
     }
   };
+
+  const showAddButton = addressInput && addressInput.startsWith('0x') && addressInput.length === 42;
   
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -95,80 +98,27 @@ const TokenSelect = ({ selectedToken, onTokenSelect, label, className }: TokenSe
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center">
             <span>Select a token</span>
-            <div className="flex gap-2">
-              <Button 
-                size="sm" 
-                variant={chainId === bsc.id ? "default" : "outline"} 
-                onClick={() => handleNetworkSwitch(bsc.id)}
-                className="text-xs"
-              >
-                <Network className="h-3 w-3 mr-1" /> Mainnet
-              </Button>
-              <Button 
-                size="sm" 
-                variant={chainId === bscTestnet.id ? "default" : "outline"} 
-                onClick={() => handleNetworkSwitch(bscTestnet.id)}
-                className="text-xs"
-              >
-                <Network className="h-3 w-3 mr-1" /> Testnet
-              </Button>
-            </div>
+            <NetworkSelector 
+              chainId={chainId}
+              onNetworkSwitch={handleNetworkSwitch}
+            />
           </DialogTitle>
-          <div className="relative mt-4 flex gap-2">
-            <div className="relative flex-grow">
-              <Search className="absolute top-3 left-3 h-4 w-4 opacity-50" />
-              <Input
-                placeholder="Search by name, symbol, or paste address"
-                className="pl-10 bg-white/5 border-white/10"
-                value={addressInput}
-                onChange={(e) => handleAddressInput(e.target.value)}
-                autoFocus
-              />
-            </div>
-            {addressInput && addressInput.startsWith('0x') && addressInput.length === 42 && (
-              <Button onClick={handleSearchOrAdd} disabled={isLoading}>
-                {isLoading ? <Loader className="h-4 w-4 animate-spin" /> : "Add"}
-              </Button>
-            )}
-          </div>
+          
+          <TokenSearch 
+            searchTerm={addressInput}
+            onSearchChange={handleAddressInput}
+            isLoading={isLoading}
+            onAddToken={handleSearchOrAdd}
+            showAddButton={showAddButton}
+          />
         </DialogHeader>
         
-        <ScrollArea className="h-80 mt-2 pr-4">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-40">
-              <Loader className="h-8 w-8 animate-spin opacity-70" />
-            </div>
-          ) : error ? (
-            <div className="text-center text-red-500 py-4">{error}</div>
-          ) : searchResults.length === 0 ? (
-            <div className="text-center text-muted-foreground py-4">No tokens found</div>
-          ) : (
-            <div className="space-y-1">
-              {searchResults.map((token) => (
-                <Button
-                  key={token.address}
-                  variant="ghost"
-                  className="w-full justify-start h-14 px-4 hover:bg-white/5"
-                  onClick={() => handleTokenSelect(token)}
-                >
-                  <div className="flex items-center gap-3">
-                    {token.logoURI && (
-                      <img 
-                        src={token.logoURI} 
-                        alt={token.symbol} 
-                        className="w-8 h-8 rounded-full"
-                      />
-                    )}
-                    <div className="flex flex-col items-start">
-                      <span className="font-semibold">{token.symbol}</span>
-                      <span className="text-xs text-muted-foreground">{token.name}</span>
-                    </div>
-                  </div>
-                </Button>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
+        <TokenList 
+          tokens={searchResults}
+          isLoading={isLoading}
+          error={error}
+          onSelect={handleTokenSelect}
+        />
       </DialogContent>
     </Dialog>
   );
