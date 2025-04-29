@@ -58,8 +58,8 @@ export function useSwapAction(swapState: SwapState) {
       // Check if we need to approve
       if (allowance && BigInt(allowance.toString()) < amountIn) {
         const approveTx = await approveToken({
-          address: swapState.tokenIn.address,
           abi: ERC20_ABI,
+          address: swapState.tokenIn.address,
           functionName: 'approve',
           args: [DEX_CONFIG.address, amountIn],
         });
@@ -105,8 +105,8 @@ export function useSwapAction(swapState: SwapState) {
       
       // Execute the swap
       const swapTx = await executeSwap({
-        address: DEX_CONFIG.address,
         abi: DEX_CONFIG.abi,
+        address: DEX_CONFIG.address,
         functionName: 'swapExactTokensForTokens',
         args: [amountIn, amountOutMin, path, address, BigInt(deadline)],
       });
