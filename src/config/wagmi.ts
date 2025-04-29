@@ -27,7 +27,8 @@ export const web3Modal = createWeb3Modal({
   themeMode: 'dark',
   themeVariables: {
     '--w3m-accent': '#8B5CF6',
-    '--w3m-background-color': '#1A1F2C'
+    // Using the correct property name from ThemeVariables type
+    '--w3m-background': '#1A1F2C'
   },
   featuredWalletIds: [],
 });
